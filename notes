@@ -1,0 +1,103 @@
+
+# install ingress
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-0.32.0/deploy/static/provider/cloud/deploy.yaml
+
+kubectl get pods -n ingress-nginx
+
+# 
+
+kubectl get pods -n ingress-nginx \
+  -l app.kubernetes.io/name=ingress-nginx --watch
+
+kubectl get componentstatuses
+
+kubectl get nodes
+
+kubectl describe nodes node-1
+
+kubectl get daemonSets --namespace=kube-system kube-proxy
+
+ kubectl get deployments --namespace=kube-system core-dns  /coredns
+
+# dns 
+
+ kubectl get services --namespace=kube-system core-dns
+
+# load balancer
+ kubectl get services --namespace=kube-system kube-dns
+
+# https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
+# deploy UI 
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/ 
+
+kubectl apply -f dashboard-adminuser.yaml
+
+#win 
+kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | sls admin-user | ForEach-Object { $_ -Split '\s+' } | Select -First 1)
+
+# bash 
+kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')
+
+
+kubectl config set-context my-context --namespace=mystuff
+
+
+
+kubectl config use-context my-context
+
+
+
+kubectl get pods my-pod -o jsonpath --template={.status.podIP}
+
+
+kubectl describe <resource-name> <obj-name>
+
+kubectl apply -f obj.yaml
+
+--dry-run 
+
+
+kubectl apply -f myobj.yaml view-last-applied
+
+
+kubectl delete -f obj.yaml
+
+
+kubectl label pods bar color=red  --overwrite
+
+
+kubectl label pods bar color-
+
+
+kubectl logs <pod-name>
+
+kubectl exec -it <pod-name> -- bash
+
+kubectl attach -it <pod-name>
+
+kubectl cp <pod-name>:</path/to/remote/file> </path/to/local/file>
+
+kubectl port-forward <pod-name> 8080:80
+
+#opens up a connection that forwards traffic from the local machine on port 8080 to the remote container on port 80.
+
+
+kubectl top nodes
+
+kubectl top pods --all-namespaces
+
+
+kubectl get pods --namespace owlvey 
+
+
+kubectl describe pods deploy-site-5894f5d59f-dx7pw --namespace owlvey 
+
+kubectl describe nodes docker-desktop/192.168.65.3 --namespace owlvey 
+
+
+
+kubectl port-forward deploy-site-5894f5d59f-dx7pw 47000:80
+
