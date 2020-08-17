@@ -1,0 +1,76 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-site-internal
+  namespace: {{NAMESPACE}}
+  labels:
+    tier: site
+    family: angular
+    apankura: 'v1'  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      key: pod-site-internal
+  template:
+    metadata:
+      labels:
+        key: pod-site-internal
+    spec:
+      containers:
+      - name: owlvey-site
+        image: owlveydevcommit/k8sisite:latest
+        imagePullPolicy: Always
+        ports:
+            - containerPort: 80
+        env:
+            - name: "ENVIRONMENT"
+              value: "k8si"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-site
+  namespace: {{NAMESPACE}}
+  labels:
+    tier: site
+    family: angular
+    apankura: 'v1'  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      key: pod-site
+  template:
+    metadata:
+      labels:
+        key: pod-site
+    spec:
+      containers:
+      - name: owlvey-site
+        image: owlveydevcommit/k8ssite:latest
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 80
+        env:
+          - name: "ENVIRONMENT"
+            value: "k8s"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: service-site
+    namespace: {{namespace}}
+spec:  
+    type: ClusterIP
+    selector:
+        key: pod-site
+    ports:
+    -   name: site
+        protocol: TCP      
+        port: 48100
+        targetPort: 80 

@@ -1,0 +1,126 @@
+# deploy-api.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        tier: api
+        family: dotnet
+        apankura: 'v1'  
+    name: deployment-api-owlvey
+    namespace: {{NAMESPACE}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      key: pod-api-owlvey
+  template:
+    metadata:
+      labels:
+        key: pod-api-owlvey
+    spec:
+      containers:
+        - name: owlvey-api
+          image: owlveydevcommit/api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: "ASPNETCORE_ENVIRONMENT"
+              value: "k8s"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 80
+            failureThreshold: 2
+            periodSeconds: 5
+
+---
+# deploy-authority.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-api-identity
+  namespace: {{NAMESPACE}}
+  labels:
+    tier: api
+    family: dotnet
+    apankura: 'v1'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      key: pod-identity-owlvey
+  template:
+    metadata:
+      labels:
+        key: pod-identity-owlvey
+    spec:      
+      containers:
+      - name: owlvey-identity
+        image: owlveydevcommit/authority:latest
+        imagePullPolicy: Always
+        ports:
+            - containerPort: 80
+        env:
+            - name: "ASPNETCORE_ENVIRONMENT"
+              value: "docker"
+            - name: "Authentication__User"
+              value: "admin@owlvey.com"
+            - name: "Authentication__Password"
+              value: "0wlv3y@"
+            - name: "Authentication__Email"
+              value: "admin@owlvey.com"
+            - name: "ASPNETCORE_ENVIRONMENT"
+              value: "k8s"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: service-api
+    namespace: {{namespace}}
+spec:  
+    type: ClusterIP
+    selector:
+        key: pod-api-owlvey
+    ports:
+    -   name: api
+        protocol: TCP      
+        port: 48100
+        targetPort: 80 
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: service-api-backdoor
+    namespace: {{namespace}}
+spec:  
+    type: ClusterIP
+    selector:
+        key: pod-api-owlvey
+    ports:
+    -   name: api
+        protocol: TCP      
+        port: 48100
+        targetPort: 80 
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: service-identity
+    namespace: {{namespace}}
+spec:  
+    type: ClusterIP
+    selector:
+        key: pod-identity-owlvey
+    ports:
+    -   name: site
+        protocol: TCP      
+        port: 48100
+        targetPort: 80 

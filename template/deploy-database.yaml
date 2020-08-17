@@ -1,0 +1,50 @@
+# deploy-relational.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    tier: db
+    family: mssql
+    apankura: 'v1'
+  name: deployment-db
+  namespace: {{NAMESPACE}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        key: pod-db-owlvey
+  template:
+    metadata:
+      labels:
+        key: pod-db-owlvey
+    spec:
+      containers:
+        - name: db
+          image: owlveydevcommit/relational:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 1433
+          env:
+            - name: "SA_PASSWORD"
+              value: "TheFalcon123"
+            - name: "ACCEPT_EULA"
+              value: "Y"
+            - name: "ASPNETCORE_ENVIRONMENT"
+              value: "docker"
+            - name: "MSSQL_PID"
+              value: "Express"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: service-state
+    namespace: {{namespace}}
+spec:  
+    type: ClusterIP
+    selector:
+        key: pod-db-owlvey
+    ports:
+    -   name: api
+        protocol: TCP      
+        port: 48203
+        targetPort: 1433 
